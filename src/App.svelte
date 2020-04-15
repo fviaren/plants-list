@@ -1,17 +1,23 @@
 <script>
 	import PlantsList from './PlantsList.svelte'
-	import fakeItems from './fakeItems'
+	
+	let plants = JSON.parse(localStorage.getItem('plants')) || [];
+
+	function onPlantsChanged(newPlantsList) {
+		plants = newPlantsList;
+		localStorage.setItem('plants', JSON.stringify(plants));
+	}
 </script>
 
 <main>
-	<PlantsList plants={fakeItems}></PlantsList>
+	<PlantsList plants={plants} plantsChangedCallback={onPlantsChanged}></PlantsList>
 </main>
 
 <style>
 	main {
-		text-align: center;
+		display: flex;
+		justify-content: center;
 		padding: 1em;
-		max-width: 240px;
 		margin: 0 auto;
 	}
 
@@ -20,11 +26,5 @@
 		text-transform: uppercase;
 		font-size: 4em;
 		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
 	}
 </style>

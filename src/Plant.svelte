@@ -2,8 +2,25 @@
     export let plant;
 </script>
 
-<div>
-    <h2>{plant.name}</h2>
-    <h3>{plant.wateringFrequency}</h3>
-    <h3>{plant.wateringAmount}</h3>
+<div class="Plant">
+    <h2 class="Plant__name">{plant.name}</h2>
+    <div class="Plant__info">
+        <div>{plant.wateringFrequency}</div>
+        <div>{plant.wateringAmount}</div>
+    </div>
 </div>
+
+<style>
+.Plant {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 1em 0;
+}
+
+.Plant__info {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+</style>
