@@ -7,6 +7,7 @@
 		plants = newPlantsList;
 		localStorage.setItem('plants', JSON.stringify(plants));
 	}
+
 </script>
 
 <main>

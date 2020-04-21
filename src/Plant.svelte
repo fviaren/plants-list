@@ -5,9 +5,11 @@
 <div class="Plant">
     <h2 class="Plant__name">{plant.name}</h2>
     <div class="Plant__info">
-        <div>{plant.wateringFrequency}</div>
-        <div>{plant.wateringAmount}</div>
+        <div>Water every {plant.wateringFrequency} days</div>
+        <div>Water amount: {plant.wateringAmount}</div>
     </div>
+    <div><strong>Watering date: </strong>{plant.nextWaterDate}</div>
+    
 </div>
 
 <style>
@@ -23,4 +25,5 @@
     justify-content: space-around;
     width: 100%;
 }
+
 </style>
