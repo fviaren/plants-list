@@ -4,16 +4,17 @@
     import moment from 'moment'
     export let plants;
     export let plantsChangedCallback;
-    
-    let inputPlantVisible = false;
 
+    let inputPlantVisible = false;
 
     function openNewPlantForm() {
         inputPlantVisible = true;
     }
+
     function closeNewPlantForm() {
         inputPlantVisible = false;
     }
+
     function onSavePlant(plant) {
         setWateringDates(plant)
         plants = [ ...plants, plant];
@@ -39,15 +40,16 @@
             }
             return item
         });
+        plantsChangedCallback(plants);
     }
+
     function setWateringDates(plant) {
         let newLastWaterDate = moment();
         let newNextWaterDate = moment(newLastWaterDate).add(plant.wateringFrequency, 'days');
         plant.lastWaterDate = newLastWaterDate;
         plant.nextWaterDate = newNextWaterDate;
     }
-    
-    
+
 </script>
 
 <div>
