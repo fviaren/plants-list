@@ -1,12 +1,13 @@
 <script>
     import Plant from './Plant.svelte';
     import NewPlantForm from './NewPlantForm.svelte'
+    import moment from 'moment'
     export let plants;
     export let plantsChangedCallback;
     
     let inputPlantVisible = false;
-    
-    
+
+
     function openNewPlantForm() {
         inputPlantVisible = true;
     }
@@ -14,8 +15,7 @@
         inputPlantVisible = false;
     }
     function onSavePlant(plant) {
-        plant['lastWaterDate'] = Date()
-        plant['nextWaterDate'] = setNextWaterDate(Date(),plant.wateringFrequency)
+        setWateringDates(plant)
         plants = [ ...plants, plant];
         closeNewPlantForm();
         plantsChangedCallback(plants);
@@ -26,22 +26,28 @@
         plantsChangedCallback(plants);
     }
 
-    function setNextWaterDate(date, days) {
+    function getNextWaterDate(date, days) {
         var result = new Date(date);
         result.setDate(result.getDate() + days);
         return result;
     }
 
     function resetWaterDate(plant) {
-        let newLastWaterDate = Date();
-        let newNextWaterDate = setNextWaterDate(Date(),plant.wateringFrequency);
-        let plantId = plant.id
         plants = plants.map(item => {
-        	return item.id === plantId?{...item, lastWaterDate:newLastWaterDate, nextWaterDate: newNextWaterDate}:{...item}});
-        plantId = null;
-        newLastWaterDate = null;
-        newNextWaterDate = null;
+            if(item.id === plant.id) {
+                setWateringDates(item)
+            }
+            return item
+        });
     }
+    function setWateringDates(plant) {
+        let newLastWaterDate = moment();
+        let newNextWaterDate = moment(newLastWaterDate).add(plant.wateringFrequency, 'days');
+        plant.lastWaterDate = newLastWaterDate;
+        plant.nextWaterDate = newNextWaterDate;
+    }
+    
+    
 </script>
 
 <div>
@@ -52,19 +58,19 @@
             <button on:click={openNewPlantForm}>Add plant</button>
         </center>
     {/if}
-    <ul class="PlantsList">
-        {#each plants as plant}
-            <li>
-                <Plant plant={plant}></Plant>
-                <button on:click={removePlant(plant.id)}>Trash</button>
-                <button on:click={resetWaterDate(plant)}>Reset</button>
-            </li>
-        {:else}
-            <h3>No plants yet</h3>
-        {/each}
-    </ul>
-
-    
+    {#if plants.length > 0}    
+        <ul class="PlantsList">
+            {#each plants as plant}
+                <li>
+                    <Plant plant={plant}></Plant>
+                    <button on:click={removePlant(plant.id)}>Trash</button>
+                    <button on:click={resetWaterDate(plant)}>Reset</button>
+                </li>
+            {/each}
+        </ul>
+    {:else}
+        <h3>No plants yet</h3>
+    {/if} 
 </div>
 
 

@@ -1,48 +1,34 @@
 <script>
+    import { v4 as uuidv4 } from 'uuid';
     export let name = '';
     export let wateringFrequency = null;
     export let wateringAmount = '';
     export let saveCallback;
     export let cancelCallback;
-//NEW//
     
-
     $: isEmpty = !name || !wateringFrequency || !wateringAmount
 
-//NEW//
-
-    const digitsRegex = /^[1-9]+$/;
     //const items = ['Very little', 'Little', 'Medium', 'Medium-high', 'High'];
     function onSave() {        
-        let plant = {id:Math.round(Math.random()* Date.now()), name, wateringFrequency, wateringAmount};
+        let plant = {id:uuidv4() , name, wateringFrequency, wateringAmount};
+        console.log(plant.id)
         saveCallback(plant);
     }
-        // saveCallback({name, wateringFrequency, wateringAmount});
-    
-    function updateValidData() {
-        const nameIsValid = name && name.length;
-        const frequencyIsValid = wateringFrequency && digitsRegex.test(wateringFrequency);
-        const amountIsValid = wateringAmount && digitsRegex.test(wateringAmount);
 
-        validData = nameIsValid && frequencyIsValid && amountIsValid;
-    }
-
-    let validData = false;
 </script>
 
 <form class="NewPlantForm" on:submit|preventDefault={onSave}>
     <h3>New Plant</h3>
     <div class="NewPlantForm__inputGroup">
         <label for="name">Plant name</label>
-        <input id="name" type="text" on:change={updateValidData} bind:value={name} placeholder="What is the name of your plant?" />
+        <input id="name" type="text" required bind:value={name} placeholder="What is the name of your plant?" />
         <label for="wateringFrequency">Watering frequency</label>
-        <input id="wateringFrequency" type="number" on:change={updateValidData} bind:value={wateringFrequency} placeholder="Every how many days do you water it?" />
+        <input id="wateringFrequency" type="number" min=-2 required bind:value={wateringFrequency} placeholder="Every how many days do you water it?" />
         <label for="wateringAmount">Watering amount</label>
-        <input id="wateringAmount" type="text" on:change={updateValidData} bind:value={wateringAmount} placeholder="How much water?" />
+        <input id="wateringAmount" type="text" required bind:value={wateringAmount} placeholder="How much water?" />
     </div>
     
     <button type="submit" disabled={isEmpty}>Save Plant</button>
-    <!-- <button on:click={onSave} disabled={!validData}>Save Plant</button> -->
     <button on:click={cancelCallback}>Cancel</button>
 
 </form>

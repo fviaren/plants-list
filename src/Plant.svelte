@@ -1,5 +1,13 @@
 <script>
     export let plant;
+    import moment from 'moment';
+    
+    let nextWateringDate = moment(plant.nextWaterDate)
+    let nextWatering = nextWateringDate.isSame(moment(), 'day')
+        ?'today'
+        :nextWateringDate.fromNow()
+
+
 </script>
 
 <div class="Plant">
@@ -8,7 +16,7 @@
         <div>Water every {plant.wateringFrequency} days</div>
         <div>Water amount: {plant.wateringAmount}</div>
     </div>
-    <div><strong>Watering date: </strong>{plant.nextWaterDate}</div>
+    <div><strong>Water again: </strong>{nextWatering}</div>
     
 </div>
 
