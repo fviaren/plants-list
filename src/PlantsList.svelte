@@ -1,24 +1,32 @@
 <script>
     import Plant from './Plant.svelte';
-    import NewPlantForm from './NewPlantForm.svelte'
+    import PlantForm from './PlantForm.svelte'
     import moment from 'moment'
     export let plants;
     export let plantsChangedCallback;
 
     let inputPlantVisible = false;
+    // set editing variables
+	let setPlantName = '';
+    let setWateringFrequency = null;
+    let setWateringAmount = '';
+    let setId = '';
+    $: isEditing = setId?true:false;
 
-    function openNewPlantForm() {
+    // functions
+    function openPlantForm() {
         inputPlantVisible = true;
+        window.scrollTo(0, 0)
     }
 
-    function closeNewPlantForm() {
+    function closePlantForm() {
         inputPlantVisible = false;
     }
 
     function onSavePlant(plant) {
         setWateringDates(plant)
         plants = [ ...plants, plant];
-        closeNewPlantForm();
+        closePlantForm();
         plantsChangedCallback(plants);
     }
 
@@ -50,26 +58,51 @@
         plant.nextWaterDate = newNextWaterDate;
     }
 
+    function setModifiedPlant(id) {
+        let plant = plants.find(item => item.id === id);
+        setId = plant.id;
+        setPlantName = plant.name;
+        setWateringFrequency = plant.wateringFrequency;
+        setWateringAmount = plant.wateringAmount;
+        openPlantForm();
+    }
+    
+	function editPlant({name, wateringFrequency, wateringAmount}) {
+        plants = plants.map(item => {
+            return item.id === setId?{...item, name:name, wateringFrequency:wateringFrequency, wateringAmount:wateringAmount}:{...item}
+		});
+        setPlantName = '';
+        setWateringFrequency = null;
+        setWateringAmount = '';
+        setId = '';
+        closePlantForm();
+        plantsChangedCallback(plants);
+	}
+
 </script>
 
 <div>
     {#if inputPlantVisible}
-        <NewPlantForm saveCallback={onSavePlant} cancelCallback={closeNewPlantForm}/>
+        <PlantForm name={setPlantName} wateringFrequency={setWateringFrequency} wateringAmount={setWateringAmount} {isEditing} {editPlant} saveCallback={onSavePlant} cancelCallback={closePlantForm}/>
     {:else}
         <center>
-            <button on:click={openNewPlantForm}>Add plant</button>
+            <button on:click={openPlantForm}>Add plant</button>
         </center>
     {/if}
     {#if plants.length > 0}    
-        <ul class="PlantsList">
-            {#each plants as plant}
-                <li>
-                    <Plant plant={plant}></Plant>
-                    <button on:click={removePlant(plant.id)}>Trash</button>
-                    <button on:click={resetWaterDate(plant)}>Reset</button>
-                </li>
-            {/each}
-        </ul>
+        <center>
+            <ul class="PlantsList">
+                {#each plants as plant}
+                    <li>
+                        <Plant plant={plant}></Plant>
+                        <button on:click={resetWaterDate(plant)}>Reset</button>
+                        <button on:click={setModifiedPlant(plant.id)}>Edit</button>
+                        <button on:click={removePlant(plant.id)}>Trash</button>
+                        
+                    </li>
+                {/each}
+            </ul>
+        </center>
     {:else}
         <h3>No plants yet</h3>
     {/if} 

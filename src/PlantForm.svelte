@@ -5,14 +5,20 @@
     export let wateringAmount = '';
     export let saveCallback;
     export let cancelCallback;
+    export let editPlant;
+    export let isEditing;
     
     $: isEmpty = !name || !wateringFrequency || !wateringAmount
 
     //const items = ['Very little', 'Little', 'Medium', 'Medium-high', 'High'];
     function onSave() {        
-        let plant = {id:uuidv4() , name, wateringFrequency, wateringAmount};
-        console.log(plant.id)
-        saveCallback(plant);
+        if(isEditing) {
+            editPlant({name, wateringFrequency, wateringAmount})
+        }
+        else {
+            let plant = {id:uuidv4() , name, wateringFrequency, wateringAmount};
+            saveCallback(plant);
+        }
     }
 
 </script>
@@ -28,7 +34,11 @@
         <input id="wateringAmount" type="text" required bind:value={wateringAmount} placeholder="How much water?" />
     </div>
     
-    <button type="submit" disabled={isEmpty}>Save Plant</button>
+    <button type="submit" disabled={isEmpty}>
+    {#if isEditing}Edit Plant
+    {:else}Add Plant
+    {/if}
+    </button>
     <button on:click={cancelCallback}>Cancel</button>
 
 </form>
