@@ -93,7 +93,7 @@
         <center>
             <ul class="PlantsList">
                 {#each plants as plant}
-                    <li>
+                    <li class="PlantsList__item">
                         <Plant plant={plant}></Plant>
                         <button on:click={resetWaterDate(plant)}>Reset</button>
                         <button on:click={setModifiedPlant(plant.id)}>Edit</button>
@@ -115,5 +115,12 @@
     padding: 0;
     list-style: none;
     width: 300px;
+}
+.PlantsList__item {
+    border: solid;
+    border-color: grey;
+    padding: 1em 0;
+    box-shadow: 5px 5px #cccccc;
+    margin: 1em 0;
 }
 </style>
