@@ -2,6 +2,7 @@
     import Plant from './Plant.svelte';
     import PlantForm from './PlantForm.svelte'
     import moment from 'moment'
+    import {afterUpdate} from 'svelte';
     export let plants;
     export let plantsChangedCallback;
 
@@ -21,18 +22,19 @@
 
     function closePlantForm() {
         inputPlantVisible = false;
+        setPlantName = '';
+        setWateringFrequency = null;
+        setWateringAmount = '';
+        setId = '';
     }
 
     function onSavePlant(plant) {
         setWateringDates(plant)
         plants = [ ...plants, plant];
-        closePlantForm();
-        plantsChangedCallback(plants);
     }
 
     function removePlant(id) {
         plants = plants.filter(item => item.id !== id);
-        plantsChangedCallback(plants);
     }
 
     function getNextWaterDate(date, days) {
@@ -48,7 +50,6 @@
             }
             return item
         });
-        plantsChangedCallback(plants);
     }
 
     function setWateringDates(plant) {
@@ -71,19 +72,16 @@
         plants = plants.map(item => {
             return item.id === setId?{...item, name:name, wateringFrequency:wateringFrequency, wateringAmount:wateringAmount}:{...item}
 		});
-        setPlantName = '';
-        setWateringFrequency = null;
-        setWateringAmount = '';
-        setId = '';
-        closePlantForm();
+    }
+    afterUpdate(()=>{
         plantsChangedCallback(plants);
-	}
+    })
 
 </script>
 
 <div>
     {#if inputPlantVisible}
-        <PlantForm name={setPlantName} wateringFrequency={setWateringFrequency} wateringAmount={setWateringAmount} {isEditing} {editPlant} saveCallback={onSavePlant} cancelCallback={closePlantForm}/>
+        <PlantForm name={setPlantName} wateringFrequency={setWateringFrequency} wateringAmount={setWateringAmount} {isEditing} {editPlant} saveCallback={onSavePlant} cancelCallback={closePlantForm} {closePlantForm}/>
     {:else}
         <center>
             <button on:click={openPlantForm}>Add plant</button>

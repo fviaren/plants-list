@@ -7,6 +7,7 @@
     export let cancelCallback;
     export let editPlant;
     export let isEditing;
+    export let closePlantForm;
     
     $: isEmpty = !name || !wateringFrequency || !wateringAmount
 
@@ -25,6 +26,7 @@
             let plant = {id:uuidv4() , name, wateringFrequency, wateringAmount};
             saveCallback(plant);
         }
+        closePlantForm();
     }
 
 </script>
