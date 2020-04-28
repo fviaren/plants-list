@@ -1,9 +1,22 @@
 <script>
+	import { onMount } from 'svelte';
+	import moment from 'moment';
 	import PlantsList from './PlantsList.svelte'
 	
 	let remindersOn = Boolean(localStorage.getItem('remindersOn'));
 	let plants = JSON.parse(localStorage.getItem('plants')) || [];
 	
+	onMount(async () => {
+		const now = moment();
+		const noon = moment().hour(23).minute(59).second(0);
+		if (now >= noon) {
+			notifyPlantsToWaterToday();
+		} else {
+			const tillNoonMS = noon.diff(now);
+			setTimeout(notifyPlantsToWaterToday, tillNoonMS - tillNoonMS);
+		}
+	});
+
 	function onPlantsChanged(newPlantsList) {
 		plants = newPlantsList;
 		localStorage.setItem('plants', JSON.stringify(plants));
@@ -22,6 +35,25 @@
 
 		localStorage.setItem('remindersOn', remindersOn);
 	};
+
+	function notifyPlantsToWaterToday() {
+		const lastNotificationDate = localStorage.getItem("lastNotificationDate");
+		if (lastNotificationDate && moment(lastNotificationDate).isSame(moment(), 'day')) {
+			return;
+		}
+
+		const plantsToWaterToday = plants.filter(plant => {
+			const nextWateringDate = moment(plant.nextWaterDate);
+			return nextWateringDate.isSame(moment().add(4, 'days'), 'day');
+		});
+
+		const plantsNames = plantsToWaterToday.map(plant => plant.name).join(', ');
+
+		if (plantsToWaterToday.length > 0) {
+			new Notification(`You have ${plantsNames} to water today! Don't forget to reset them once you are done ;)`);
+			localStorage.setItem("lastNotificationDate", moment());
+		}
+	}
 </script>
 
 <main>
