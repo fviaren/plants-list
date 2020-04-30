@@ -5,6 +5,8 @@
     let nextWateringDate = moment(plant.nextWaterDate)
     let nextWatering = nextWateringDate.isSame(moment(), 'day')
         ?'today'
+        :nextWateringDate.isSame(moment().subtract(1, 'days'), 'day')
+        ?'yesterday'
         :nextWateringDate.fromNow()
 
 

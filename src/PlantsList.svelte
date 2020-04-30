@@ -5,6 +5,7 @@
     import {afterUpdate} from 'svelte';
     export let plants;
     export let plantsChangedCallback;
+    export let getPlantsToWaterToday;
 
     let inputPlantVisible = false;
     // set editing variables
@@ -31,6 +32,7 @@
     function onSavePlant(plant) {
         setWateringDates(plant)
         plants = [ ...plants, plant];
+
     }
 
     function removePlant(id) {
@@ -73,6 +75,21 @@
             return item.id === setId?{...item, name:name, wateringFrequency:wateringFrequency, wateringAmount:wateringAmount}:{...item}
 		});
     }
+    function resetWaterDatesToday(plants) {
+        let today = moment();
+        let plantsToWaterToday = plants.filter(item => moment(item.nextWaterDate).isSameOrBefore(today, 'day'));
+        if(plantsToWaterToday.length === 0) {
+            alert("You have no plants to water today.\nIf you are waterning plants anyway, please reset each one separately.")
+        }
+        else {
+            const plantsNames = plantsToWaterToday.map(plant => plant.name).join(', ');
+            if(confirm(`Are you sure?\nYou are about to reset the next watering date of:\n${plantsNames}`)) {
+                resetWaterDate(plantsToWaterToday);
+            }
+        }
+        
+    }
+
     afterUpdate(()=>{
         plantsChangedCallback(plants);
     })
@@ -89,13 +106,14 @@
     {/if}
     {#if plants.length > 0}    
         <center>
+            <button on:click={resetWaterDatesToday(plants)}>Watered all plants</button>
             <ul class="PlantsList">
                 {#each plants as plant}
                     <li class="PlantsList__item">
                         <Plant plant={plant}></Plant>
-                        <button on:click={resetWaterDate(plant)}>Reset</button>
-                        <button on:click={setModifiedPlant(plant.id)}>Edit</button>
-                        <button on:click={removePlant(plant.id)}>Trash</button>
+                        <button class="button-plant-action" on:click={resetWaterDate(plant)}><img src="/assets/watering-can.png" height="40" alt="watering can" title="Mark plant as watered"/></button>
+                        <button class="button-plant-action" on:click={setModifiedPlant(plant.id)}><img src="/assets/pencil.png" height="40" alt="edit" title="Edit plant"/></button>
+                        <button class="button-plant-action" on:click={removePlant(plant.id)}><img src="/assets/trash.png" height="40" alt="trash" title="Remove plant"/></button>
                         
                     </li>
                 {/each}
@@ -112,7 +130,7 @@
     margin: 1em 0;
     padding: 0;
     list-style: none;
-    width: 300px;
+    width: 400px;
 }
 .PlantsList__item {
     border: solid;
@@ -121,4 +139,14 @@
     box-shadow: 5px 5px #cccccc;
     margin: 1em 0;
 }
+.button-plant-action {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    vertical-align: middle;
+    transition: transform .2s ease-in;
+}
+.button-plant-action:hover :hover {
+          transform: scale3d(1.4, 1.4, 1);  
+        }
 </style>

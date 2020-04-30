@@ -15,6 +15,7 @@
 			const tillNoonMS = noon.diff(now);
 			setTimeout(notifyPlantsToWaterToday, tillNoonMS - tillNoonMS);
 		}
+		
 	});
 
 	function onPlantsChanged(newPlantsList) {
@@ -44,7 +45,7 @@
 
 		const plantsToWaterToday = plants.filter(plant => {
 			const nextWateringDate = moment(plant.nextWaterDate);
-			return nextWateringDate.isSame(moment().add(4, 'days'), 'day');
+			return nextWateringDate.isSameOrBefore(moment(), 'day');
 		});
 
 		const plantsNames = plantsToWaterToday.map(plant => plant.name).join(', ');
@@ -58,7 +59,7 @@
 
 <main>
 	<button on:click={toggleReminders}>{remindersOn ? 'ON' : 'OFF'}</button>
-	<PlantsList plants={plants} plantsChangedCallback={onPlantsChanged}></PlantsList>
+	<PlantsList plants={plants} plantsChangedCallback={onPlantsChanged} />
 </main>
 
 <style>
