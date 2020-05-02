@@ -2,10 +2,13 @@
     import Plant from './Plant.svelte';
     import PlantForm from './PlantForm.svelte'
     import moment from 'moment'
-    import {afterUpdate} from 'svelte';
+    import { afterUpdate } from 'svelte';
+    import { fly, fade } from 'svelte/transition';
+    import { flip } from 'svelte/animate';
+
     export let plants;
     export let plantsChangedCallback;
-    export let getPlantsToWaterToday;
+    // export let getPlantsToWaterToday;
 
     let inputPlantVisible = false;
     // set editing variables
@@ -51,7 +54,7 @@
                 setWateringDates(item)
             }
             return item
-        });
+        });console.log(plant)
     }
 
     function setWateringDates(plant) {
@@ -59,6 +62,7 @@
         let newNextWaterDate = moment(newLastWaterDate).add(plant.wateringFrequency, 'days');
         plant.lastWaterDate = newLastWaterDate;
         plant.nextWaterDate = newNextWaterDate;
+        
     }
 
     function setModifiedPlant(id) {
@@ -85,6 +89,7 @@
             const plantsNames = plantsToWaterToday.map(plant => plant.name).join(', ');
             if(confirm(`Are you sure?\nYou are about to reset the next watering date of:\n${plantsNames}`)) {
                 resetWaterDate(plantsToWaterToday);
+                alert(`You just watered:\n${plantsNames}`)
             }
         }
         
@@ -106,16 +111,28 @@
     {/if}
     {#if plants.length > 0}    
         <center>
-            <button on:click={resetWaterDatesToday(plants)}>Watered all plants</button>
+            <button class="button-plant-action" on:click={resetWaterDatesToday(plants)} title="Watered plants today">
+                <img src="/assets/watering-can.png" height="40" alt="watering can" />
+                <div>
+                    <i class="fas fa-seedling" />
+                    <i class="fas fa-seedling" />
+                    <i class="fas fa-seedling" />
+                    <i class="fas fa-seedling" />
+                </div>
+                
+            </button>
             <ul class="PlantsList">
-                {#each plants as plant}
-                    <li class="PlantsList__item">
-                        <Plant plant={plant}></Plant>
-                        <button class="button-plant-action" on:click={resetWaterDate(plant)}><img src="/assets/watering-can.png" height="40" alt="watering can" title="Mark plant as watered"/></button>
-                        <button class="button-plant-action" on:click={setModifiedPlant(plant.id)}><img src="/assets/pencil.png" height="40" alt="edit" title="Edit plant"/></button>
-                        <button class="button-plant-action" on:click={removePlant(plant.id)}><img src="/assets/trash.png" height="40" alt="trash" title="Remove plant"/></button>
-                        
-                    </li>
+                {#each plants as plant, index (plant.id)}
+                    <div in:fly={{x: 200, delay: (index +1) * 300}} out:fly={{x: -200}} animate:flip>
+                        <li class="PlantsList__item">
+                            <Plant plant={plant}></Plant>
+                            <div>
+                                <button class="button-plant-action" on:click={resetWaterDate(plant)}><img src="/assets/watering-can.png" height="40" alt="watering can" title="Mark plant as watered"/></button>
+                                <button class="button-plant-action" on:click={setModifiedPlant(plant.id)}><img src="/assets/pencil.png" height="40" alt="edit" title="Edit plant"/></button>
+                                <button class="button-plant-action" on:click={removePlant(plant.id)}><img src="/assets/trash.png" height="40" alt="trash" title="Remove plant"/></button>
+                            </div>
+                        </li>
+                    </div>
                 {/each}
             </ul>
         </center>
@@ -139,14 +156,15 @@
     box-shadow: 5px 5px #cccccc;
     margin: 1em 0;
 }
-.button-plant-action {
+button.button-plant-action {
     background-color: transparent;
     border: none;
     cursor: pointer;
     vertical-align: middle;
     transition: transform .2s ease-in;
 }
-.button-plant-action:hover :hover {
-          transform: scale3d(1.4, 1.4, 1);  
-        }
+button.button-plant-action:hover {
+    transform: scale3d(1.4, 1.4, 1);  
+}
+
 </style>

@@ -1,23 +1,40 @@
 <script>
     export let plant;
     import moment from 'moment';
+    import { slide } from 'svelte/transition';
     
-    let nextWateringDate = moment(plant.nextWaterDate)
-    let nextWatering = nextWateringDate.isSame(moment(), 'day')
+    $: nextWateringDate = moment(plant.nextWaterDate)
+    $: nextWatering = nextWateringDate.isSame(moment(), 'day')
         ?'today'
         :nextWateringDate.isSame(moment().subtract(1, 'days'), 'day')
         ?'yesterday'
         :nextWateringDate.fromNow()
 
+    let isDisplayPlantInfo = false;
+    function togglePlantInfo() {
+        isDisplayPlantInfo =!isDisplayPlantInfo;
+    }
 
 </script>
 
 <div class="Plant">
-    <h2 class="Plant__name">{plant.name}</h2>
-    <div class="Plant__info">
-        <div>Water every:<br>{plant.wateringFrequency} days</div>
-        <div>Water amount:<br>{plant.wateringAmount}</div>
+    <div class="Plant__header">
+        <h2 class="Plant__name">{plant.name}
+            <button class="toggle-plant" on:click={togglePlantInfo}>
+                {#if isDisplayPlantInfo}
+                    <i class="fas fa-caret-up"/>
+                {:else}
+                    <i class="fas fa-caret-down"/>
+                {/if}
+            </button>
+        </h2>
     </div>
+    {#if isDisplayPlantInfo}
+        <div transition:slide class="Plant__info">
+            <div>Water every:<br>{plant.wateringFrequency} days</div>
+            <div>Water amount:<br>{plant.wateringAmount}</div>
+        </div>
+    {/if}
     <div><strong>Water again: </strong>{nextWatering}</div>
     
 </div>
@@ -28,7 +45,6 @@
     flex-direction: column;
     align-items: center;
     margin-bottom: 1em;
-
 }
 
 .Plant__info {
@@ -38,4 +54,16 @@
     margin-bottom: 1em;
 }
 
+button.toggle-plant {
+    border: none;
+    background: transparent;
+    align-self: right;
+}
+
+button.toggle-plant:hover {
+    color:grey;
+}
+button.toggle-plant:before {
+    transform: rotateX(180deg)
+}
 </style>
