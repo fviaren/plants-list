@@ -1,14 +1,14 @@
 <script>
     import { v4 as uuidv4 } from 'uuid';
-    export let name = '';
-    export let wateringFrequency = null;
-    export let wateringAmount = '';
-    export let saveCallback;
-    export let cancelCallback;
-    export let editPlant;
-    export let isEditing;
-    export let closePlantForm;
+    import globalStore from './stores/globalStore';
+    import plants, {editPlant, addPlant} from './stores/plantsStore';
+    const id = $globalStore.editedPlantId;
+    let plant = $globalStore.isEditing?$plants.find(item => item.id === id):false;
+    export let name = plant?plant.name:'';
+    export let wateringFrequency = plant?plant.wateringFrequency:'';
+    export let wateringAmount = plant?plant.wateringAmount:'';
     
+
     $: isEmpty = !name || !wateringFrequency || !wateringAmount
 
     let optionsAmount = [
@@ -19,21 +19,28 @@
         {text: 'High'}
         ];
     function onSave() {        
-        if(isEditing) {
-            editPlant({name, wateringFrequency, wateringAmount})
+        if($globalStore.isEditing) {
+            editPlant({id, name, wateringFrequency, wateringAmount});
+            globalStore.updateState('isEditing', false);
+            globalStore.updateState('editedPlantId', false)
         }
         else {
             let plant = {id:uuidv4() , name, wateringFrequency, wateringAmount};
-            saveCallback(plant);
+            addPlant(plant);
         }
         closePlantForm();
+        
+    }
+    function closePlantForm() {
+        globalStore.updateState('plantForm', false)
+        globalStore.updateState('editedPlantId', false)
     }
 
 </script>
 
 <form class="NewPlantForm" on:submit|preventDefault={onSave}>
     <h3>
-    {#if isEditing}Edit Plant
+    {#if $globalStore.isEditing}Edit Plant
     {:else}New Plant
     {/if}
     </h3>
@@ -53,11 +60,11 @@
     </div>
     
     <button type="submit" disabled={isEmpty}>
-    {#if isEditing}Edit Plant
+    {#if $globalStore.isEditing}Edit Plant
     {:else}Add Plant
     {/if}
     </button>
-    <button on:click={cancelCallback}>Cancel</button>
+    <button on:click={()=>{closePlantForm()}}>Cancel</button>
 
 </form>
 

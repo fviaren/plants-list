@@ -2,127 +2,67 @@
     import Plant from './Plant.svelte';
     import PlantForm from './PlantForm.svelte'
     import moment from 'moment'
-    import { afterUpdate } from 'svelte';
+    import { afterUpdate, setContext } from 'svelte';
     import { fly, fade } from 'svelte/transition';
     import { flip } from 'svelte/animate';
-
-    export let plants;
-    export let plantsChangedCallback;
-    // export let getPlantsToWaterToday;
-
-    let inputPlantVisible = false;
-    // set editing variables
-	let setPlantName = '';
-    let setWateringFrequency = null;
-    let setWateringAmount = '';
-    let setId = '';
-    $: isEditing = setId?true:false;
-
-    // functions
-    function openPlantForm() {
-        inputPlantVisible = true;
-        window.scrollTo(0, 0)
-    }
-
-    function closePlantForm() {
-        inputPlantVisible = false;
-        setPlantName = '';
-        setWateringFrequency = null;
-        setWateringAmount = '';
-        setId = '';
-    }
-
-    function onSavePlant(plant) {
-        setWateringDates(plant)
-        plants = [ ...plants, plant];
-
-    }
-
-    function removePlant(id) {
-        plants = plants.filter(item => item.id !== id);
-    }
-
-    function getNextWaterDate(date, days) {
-        var result = new Date(date);
-        result.setDate(result.getDate() + days);
-        return result;
-    }
-
-    function resetWaterDate(plant) {
-        plants = plants.map(item => {
-            if(item.id === plant.id) {
-                setWateringDates(item)
-            }
-            return item
-        });console.log(plant)
-    }
-
-    function setWateringDates(plant) {
-        let newLastWaterDate = moment();
-        let newNextWaterDate = moment(newLastWaterDate).add(plant.wateringFrequency, 'days');
-        plant.lastWaterDate = newLastWaterDate;
-        plant.nextWaterDate = newNextWaterDate;
-        
-    }
+    import globalStore from './stores/globalStore';
+    import plants, { plantsToday, plantsNames, removePlant, resetWaterDate } from './stores/plantsStore';
 
     function setModifiedPlant(id) {
-        let plant = plants.find(item => item.id === id);
-        setId = plant.id;
-        setPlantName = plant.name;
-        setWateringFrequency = plant.wateringFrequency;
-        setWateringAmount = plant.wateringAmount;
-        openPlantForm();
+        window.scrollTo(0, 0);
+        let plant = $plants.find(item => item.id === id);
+        globalStore.updateState('plantForm', true)
+        globalStore.updateState('isEditing', true)
+        globalStore.updateState('editedPlantId', id)
     }
     
-	function editPlant({name, wateringFrequency, wateringAmount}) {
-        plants = plants.map(item => {
-            return item.id === setId?{...item, name:name, wateringFrequency:wateringFrequency, wateringAmount:wateringAmount}:{...item}
-		});
-    }
     function resetWaterDatesToday(plants) {
         let today = moment();
-        let plantsToWaterToday = plants.filter(item => moment(item.nextWaterDate).isSameOrBefore(today, 'day'));
-        if(plantsToWaterToday.length === 0) {
+        if($plantsToday.length === 0) {
             alert("You have no plants to water today.\nIf you are waterning plants anyway, please reset each one separately.")
         }
         else {
-            const plantsNames = plantsToWaterToday.map(plant => plant.name).join(', ');
-            if(confirm(`Are you sure?\nYou are about to reset the next watering date of:\n${plantsNames}`)) {
-                resetWaterDate(plantsToWaterToday);
-                alert(`You just watered:\n${plantsNames}`)
+            const plantNames = plantsNames($plantsToday)
+            if(confirm(`Are you sure?\nYou are about to reset the next watering date of:\n${plantNames}`)) {
+                let plantToday;
+                for (plantToday in $plantsToday) {
+                    resetWaterDate(plantToday);
+                }
+                alert(`You just watered:\n${plantNames}`)
             }
         }
         
     }
-
-    afterUpdate(()=>{
-        plantsChangedCallback(plants);
-    })
 
 </script>
 
 <div>
-    {#if inputPlantVisible}
-        <PlantForm name={setPlantName} wateringFrequency={setWateringFrequency} wateringAmount={setWateringAmount} {isEditing} {editPlant} saveCallback={onSavePlant} cancelCallback={closePlantForm} {closePlantForm}/>
-    {:else}
+    {#if $plants.length > 0}    
         <center>
-            <button on:click={openPlantForm}>Add plant</button>
-        </center>
-    {/if}
-    {#if plants.length > 0}    
-        <center>
-            <button class="button-plant-action" on:click={resetWaterDatesToday(plants)} title="Watered plants today">
-                <img src="/assets/watering-can.png" height="40" alt="watering can" />
-                <div>
-                    <i class="fas fa-seedling" />
-                    <i class="fas fa-seedling" />
-                    <i class="fas fa-seedling" />
-                    <i class="fas fa-seedling" />
+            
+            <button class="button-plant-action" on:click={resetWaterDatesToday($plants)} title="Watered plants today">
+                <div class="button__block">
+                    <div class="button__image">
+                        <img src="/assets/watering-can.png" height="40" alt="watering can" />
+                        <div class="plant-icon">
+                            <i class="fas fa-seedling" />
+                            <i class="fas fa-seedling" />
+                            <i class="fas fa-seedling" />
+                            <i class="fas fa-seedling" />
+                        </div>
+                    </div>
+                    <div class="PlantsToday__list">
+                        <ul class="PlantsToday__list">
+                            {#each $plantsToday as plantToday}
+                                <li >{plantToday.name}</li>
+                            {/each}
+                        </ul>
+                    </div>
                 </div>
                 
             </button>
             <ul class="PlantsList">
-                {#each plants as plant, index (plant.id)}
+                {#each $plants as plant, index (plant.id)}
                     <div in:fly={{x: 200, delay: (index +1) * 300}} out:fly={{x: -200}} animate:flip>
                         <li class="PlantsList__item">
                             <Plant plant={plant}></Plant>
@@ -162,9 +102,30 @@ button.button-plant-action {
     cursor: pointer;
     vertical-align: middle;
     transition: transform .2s ease-in;
+    
 }
 button.button-plant-action:hover {
     transform: scale3d(1.4, 1.4, 1);  
+}
+.plant-icon {
+    color:green;
+}
+.PlantsToday__list {
+    position: relative;
+    display: inline-block;
+}
+ul.PlantsToday__list {
+    list-style: none;
+    font-size: 0.8em;
+    text-align: left;
+    position: relative;
+    display: inline-block;
+    vertical-align: middle;
+}
+.button__image {
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
 }
 
 </style>
