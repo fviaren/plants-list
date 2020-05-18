@@ -16,7 +16,7 @@
         globalStore.updateState('editedPlantId', id)
     }
     
-    function resetWaterDatesToday(plants) {
+    function resetWaterDatesToday($plantsToday) {
         let today = moment();
         if($plantsToday.length === 0) {
             alert("You have no plants to water today.\nIf you are waterning plants anyway, please reset each one separately.")
@@ -25,7 +25,7 @@
             const plantNames = plantsNames($plantsToday)
             if(confirm(`Are you sure?\nYou are about to reset the next watering date of:\n${plantNames}`)) {
                 let plantToday;
-                for (plantToday in $plantsToday) {
+                for (plantToday of $plantsToday) {
                     resetWaterDate(plantToday);
                 }
                 alert(`You just watered:\n${plantNames}`)
@@ -42,7 +42,7 @@
             
             <button class="button-plant-action" on:click={resetWaterDatesToday($plants)} title="Watered plants today">
                 <div class="button__block">
-                    <div class="button__image">
+                    <div class="button__image {$plantsToday.length === 0?'inactive':''}" >
                         <img src="/assets/watering-can.png" height="40" alt="watering can" />
                         <div class="plant-icon">
                             <i class="fas fa-seedling" />
@@ -52,11 +52,17 @@
                         </div>
                     </div>
                     <div class="PlantsToday__list">
+                            
                         <ul class="PlantsToday__list">
+                        {#if $plantsToday.length==0}
+                            <li>No plants to water today</li>
+                        {:else}
                             {#each $plantsToday as plantToday}
                                 <li >{plantToday.name}</li>
                             {/each}
+                        {/if}
                         </ul>
+                    
                     </div>
                 </div>
                 
@@ -126,6 +132,9 @@ ul.PlantsToday__list {
     display: inline-block;
     position: relative;
     vertical-align: middle;
+}
+.inactive {
+    filter: grayscale(100%);
 }
 
 </style>
