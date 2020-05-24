@@ -1,16 +1,15 @@
 <script>
 	import { onMount, afterUpdate} from 'svelte';
 	import moment from 'moment';
+	// components
 	import PlantsList from './PlantsList.svelte';
 	import Navbar from './Navbar.svelte';
 	import PlantForm from './PlantForm.svelte'
+	// stores
 	import globalStore from './stores/globalStore';
 	import plants, { plantsToday, plantsNames, setStoragePlants } from './stores/plantsStore';
-	// import remindersStore from './stores/remindersStore';
+	import reminders, { setStorageReminders } from './stores/remindersStore';
 
-	let remindersOn = Boolean(localStorage.getItem('remindersOn')); // added to reminders store
-	// let plants = JSON.parse(localStorage.getItem('plants')) || []; // added to plantsStore
-	
 	onMount(async () => {
 		const now = moment();
 		const noon = moment().hour(23).minute(59).second(0);
@@ -23,43 +22,15 @@
 		
 	});
 
-	async function toggleReminders() {
-		if (remindersOn) {
-			remindersOn = false;
-		} else {
-			const permission = await Notification.requestPermission();
-			
-			if (permission === 'granted') {
-				remindersOn = true;
-			}
-		}
-		localStorage.setItem('remindersOn', remindersOn);
-	}; // added to reminders store see below function to replace
-
-	// async function updateReminders() {
-	// 	if($reminders.permission != 'granted') {
-	// 		const permission = await Notification.requestPermission();
-	// 		reminders.updateState('permission', 'granted')
-	// 	}
-	// 	if($reminders.remindersOn == True) {
-	// 		reminders.updateState('remindersOn', false)
-	// 	}
-	// 	else{
-	// 		reminders.updateState('remindersOn', true)
-	// 	}
-	// 	setStorageReminders($reminders)
-	// };
-
-
 	function notifyPlantsToWaterToday() {
-		const lastNotificationDate = localStorage.getItem("lastNotificationDate");
-		if (lastNotificationDate && moment(lastNotificationDate).isSame(moment(), 'day')) {
+		if ($reminders.lastNotificationDate && moment($reminders.lastNotificationDate).isSame(moment(), 'day')) {
 			return;
 		}
 		const plantNames = plantsNames($plantsToday)
-		if ($plantsToday.length > 0) {
+		if ($reminders.remindersOn && $plantsToday.length > 0) {
 			new Notification(`You have ${plantNames} to water today! Don't forget to reset them once you are done ;)`);
-			localStorage.setItem("lastNotificationDate", moment()); // use toggle item from remindersStore
+			reminders.updateState('lastNotificationDate', moment());
+			setStorageReminders($reminders);
 		}
 	}
 	
@@ -70,11 +41,6 @@
 
 <Navbar />
 <main>
-	<!-- <label class="switch">
-		<input type="checkbox" bind:checked={remindersOn}/>
-		<span class="slider round" />
-	</label> -->
-	<button on:click={toggleReminders}>{remindersOn ? 'ON' : 'OFF'}</button>
 	{#if $globalStore.plantForm}
 		<PlantForm/>
 	{/if}
@@ -90,65 +56,4 @@
 		margin: 0 auto;
 	}
 
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 60px;
-  height: 34px;
-}
-
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 26px;
-  width: 26px;
-  left: 4px;
-  bottom: 4px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-}
-
-input:checked + .slider {
-  background-color: #2196F3;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #2196F3;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(26px);
-  -ms-transform: translateX(26px);
-  transform: translateX(26px);
-}
-
-/* Rounded sliders */
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
 </style>
