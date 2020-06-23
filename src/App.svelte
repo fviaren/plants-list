@@ -46,7 +46,11 @@
 	{/if}
 	<PlantsList plants={$plants} />
 </main>
-
+<footer>
+	<div id='footer'>
+		Icons made by <a href="https://www.flaticon.com/free-icon/watering-can_2432109?term=water%20can&page=3&position=23" title="Good Ware">Good Ware</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a>
+	</div>
+</footer>
 <style>
 	main {
 		display: flex;
@@ -54,6 +58,10 @@
 		justify-content: center;
 		padding: 1em;
 		margin: 0 auto;
+	}
+	#footer {
+		bottom: 0%;
+		position: fixed;
 	}
 
 </style>
