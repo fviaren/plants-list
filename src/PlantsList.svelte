@@ -1,12 +1,17 @@
 <script>
     import Plant from './Plant.svelte';
     import PlantForm from './PlantForm.svelte'
+    import PlantInfo from './PlantInfo.svelte';
     import moment from 'moment'
     import { afterUpdate, setContext } from 'svelte';
     import { fly, fade } from 'svelte/transition';
     import { flip } from 'svelte/animate';
     import globalStore from './stores/globalStore';
     import plants, { plantsToday, plantsNames, removePlant, resetWaterDate } from './stores/plantsStore';
+    import trefleApi from './trefleApi';
+
+    let plantInfo = {};
+    let showPlantInfoId = null;
 
     function setModifiedPlant(id) {
         window.scrollTo(0, 0);
@@ -15,7 +20,7 @@
         globalStore.updateState('isEditing', true)
         globalStore.updateState('editedPlantId', id)
     }
-    
+
     function resetWaterDatesToday($plantsToday) {
         let today = moment();
         if($plantsToday.length === 0) {
@@ -31,15 +36,31 @@
                 alert(`You just watered:\n${plantNames}`)
             }
         }
-        
+
+    }
+
+    function showInfo(id, name) {
+        if (!plantInfo[id]) {
+            plantInfo[id] = trefleApi.getPlantInfo();
+        }
+
+        if (plantInfo[id]) {
+            showPlantInfoId = id;
+        }
+    }
+
+    function hideInfo() {
+        showPlantInfoId = null;
     }
 
 </script>
 
 <div>
-    {#if $plants.length > 0}    
+    {#if $plants.length > 0}
+        {#if showPlantInfoId}
+            <PlantInfo info={plantInfo[showPlantInfoId]} />
+        {/if}
         <center>
-            
             <button class="button-plant-action" on:click={resetWaterDatesToday($plants)} title="Watered plants today">
                 <div class="button__block">
                     <div class="button__image {$plantsToday.length === 0?'inactive':''}" >
@@ -52,7 +73,7 @@
                         </div>
                     </div>
                     <div class="PlantsToday__list">
-                            
+
                         <ul class="PlantsToday__list">
                         {#if $plantsToday.length==0}
                             <li>No plants to water today</li>
@@ -62,10 +83,10 @@
                             {/each}
                         {/if}
                         </ul>
-                    
+
                     </div>
                 </div>
-                
+
             </button>
             <ul class="PlantsList">
                 {#each $plants as plant, index (plant.id)}
@@ -75,6 +96,7 @@
                             <div>
                                 <button class="button-plant-action" on:click={resetWaterDate(plant)}><img src="/assets/watering-can.png" height="40" alt="watering can" title="Mark plant as watered"/></button>
                                 <button class="button-plant-action" on:click={setModifiedPlant(plant.id)}><img src="/assets/pencil.png" height="40" alt="edit" title="Edit plant"/></button>
+                                <button class="button-plant-action" on:click={showInfo(plant.id, plant.name)}><i class="fa fa-info-circle" aria-hidden="true">&nbsp;</i></button>
                                 <button class="button-plant-action" on:click={removePlant(plant.id)}><img src="/assets/trash.png" height="40" alt="trash" title="Remove plant"/></button>
                             </div>
                         </li>
@@ -84,7 +106,7 @@
         </center>
     {:else}
         <h3>No plants yet</h3>
-    {/if} 
+    {/if}
 </div>
 
 
@@ -108,10 +130,10 @@ button.button-plant-action {
     cursor: pointer;
     vertical-align: middle;
     transition: transform .2s ease-in;
-    
+
 }
 button.button-plant-action:hover {
-    transform: scale3d(1.4, 1.4, 1);  
+    transform: scale3d(1.4, 1.4, 1);
 }
 .plant-icon {
     color:green;
