@@ -1,5 +1,4 @@
 import {writable} from 'svelte/store';
-import store from '../../../razors/src/stores/globalStore';
 
 const reminders = writable(getStorageReminders())
 
