@@ -50,7 +50,6 @@
         <label for="wateringFrequency">Watering frequency</label>
         <input id="wateringFrequency" type="number" min=-2 required bind:value={wateringFrequency} placeholder="Every how many days do you water it?" />
         <label for="wateringAmount">Watering amount</label>
-        <!-- <input id="wateringAmount" type="text" required bind:value={wateringAmount} placeholder="How much water?" /> -->
         <select id="wateringAmount" required bind:value={wateringAmount}>
             <option value="" disabled>-- Select watering amount --</option>
             {#each optionsAmount as option}

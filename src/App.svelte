@@ -61,7 +61,8 @@
 	}
 	#footer {
 		bottom: 0%;
-		position: fixed;
+		background-color: white;
+		width: 100%;
 	}
 
 </style>

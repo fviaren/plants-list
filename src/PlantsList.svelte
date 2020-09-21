@@ -39,9 +39,9 @@
 
     }
 
-    function showInfo(id, name) {
+    async function showInfo(id, name) {
         if (!plantInfo[id]) {
-            plantInfo[id] = trefleApi.getPlantInfo();
+            plantInfo[id] = await trefleApi.getPlantInfo(name);
         }
 
         if (plantInfo[id]) {
@@ -58,7 +58,7 @@
 <div>
     {#if $plants.length > 0}
         {#if showPlantInfoId}
-            <PlantInfo info={plantInfo[showPlantInfoId]} />
+            <PlantInfo info={plantInfo[showPlantInfoId]} {hideInfo}/>
         {/if}
         <center>
             <button class="button-plant-action" on:click={resetWaterDatesToday($plants)} title="Watered plants today">
@@ -94,9 +94,9 @@
                         <li class="PlantsList__item">
                             <Plant plant={plant}></Plant>
                             <div>
+                                <button class="button-plant-action" on:click={showInfo(plant.id, plant.name)}><i class="fa fa-info-circle" aria-hidden="true">&nbsp;</i></button>
                                 <button class="button-plant-action" on:click={resetWaterDate(plant)}><img src="/assets/watering-can.png" height="40" alt="watering can" title="Mark plant as watered"/></button>
                                 <button class="button-plant-action" on:click={setModifiedPlant(plant.id)}><img src="/assets/pencil.png" height="40" alt="edit" title="Edit plant"/></button>
-                                <button class="button-plant-action" on:click={showInfo(plant.id, plant.name)}><i class="fa fa-info-circle" aria-hidden="true">&nbsp;</i></button>
                                 <button class="button-plant-action" on:click={removePlant(plant.id)}><img src="/assets/trash.png" height="40" alt="trash" title="Remove plant"/></button>
                             </div>
                         </li>
