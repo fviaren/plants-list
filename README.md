@@ -24,7 +24,13 @@ To develop this app locally:
     npm install
     ```
 
-3. start local dev server
+3. run token server (used to get JWT trefle.io token)
+    ```
+    export TREFLE_API_TOKEN="<put your trefle.io token here>"
+    node src/tokenServer.js
+    ```
+
+4. start local dev server
     ```
     npm run dev
     ```
