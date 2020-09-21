@@ -4,7 +4,7 @@ const trefleApi = {
 
     try {const response = await fetch(
       `https://trefle.io/api/v1/plants/search?q=${name}`, {headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo3MzYwLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJpcCI6bnVsbCwiZXhwaXJlIjoiMjAyMC0wOS0xOSAxMTo1ODo1NiArMDAwMCIsImV4cCI6MTYwMDUxNjczNn0.4UOB2YgmOT6qmrqqfPuHOpwnDfo_hgNFCPllHRWwq94',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjo3MzYwLCJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjUwMDAiLCJpcCI6bnVsbCwiZXhwaXJlIjoiMjAyMC0wOS0yMiAxMzozNDoxMCArMDAwMCIsImV4cCI6MTYwMDc4MTY1MH0.NzQl8GEaSD10z8RnAZ1GD5f5b2loGSrSAsSY8hslwiQ',
         'Content-Type': 'application/json'
       }})
     const plantDataJson = await response.json();
